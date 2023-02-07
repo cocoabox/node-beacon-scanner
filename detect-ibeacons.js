@@ -2,12 +2,7 @@
 const BeaconScanner = require('./lib/scanner-ex');
 const {Lescan} = require('switchbot-without-noble');
 
-async function do_scan(hci , time) {
-    const scan_duration = time ? parseInt(time) : null;
-    if ( isNaN(scan_duration) ) {
-        console.warn('invalid --time :' , time);
-        process.exit(1);
-    }
+async function do_scan(hci) {
     const lescan = new Lescan(hci);
     const bye = async () => {
         console.warn('GOODBYE');
@@ -34,7 +29,6 @@ async function do_scan(hci , time) {
 }
 
 (async () => {
-    console.warn('scan start');
     const hci = parseInt(process.argv[2] ?? 'hci0');
     process.exit(0);
     await do_scan(hci);
