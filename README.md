@@ -1,4 +1,4 @@
-node-beacon-scanner
+node-beacon-scanner (without noble, linux only)
 ===============
 
 The node-beacon-scanner is a Node.js module which allows you to scan BLE beacon packets and parse the packet data. This module supports iBeacon, Eddystone, and Estimote.
@@ -15,24 +15,30 @@ The supported beacon data formats are as follows:
 
 ## Dependencies
 
-* [Node.js](https://nodejs.org/en/) 6 +
-* [@abandonware/noble](https://github.com/abandonware/noble)
+* [Node.js](https://nodejs.org/en/) 16 +
+* bluez/gatttool/hcitool/hcidump commands on linux
+* [switchbot-without-noble](https://github.com/cocoabox/switchbot-without-noble)
+* ~~[@abandonware/noble](https://github.com/abandonware/noble)~~
 
-See the document of the [@abandonware/noble](https://github.com/abandonware/noble) for details on installing the [@abandonware/noble](https://github.com/abandonware/noble).
+~~See the document of the [@abandonware/noble](https://github.com/abandonware/noble) for details on installing the [@abandonware/noble](https://github.com/abandonware/noble).~~
 
-Note that the noble has to be run as root on most of Linux environments. See the the document of the [@abandonware/noble](https://github.com/abandonware/noble) for details.
+~~Note that the noble has to be run as root on most of Linux environments. See the the document of the [@abandonware/noble](https://github.com/abandonware/noble) for details.~~
 
-The early versions of this module depended on [noble](https://github.com/sandeepmistry/noble) for BLE handling. But the [noble](https://github.com/sandeepmistry/noble) seems not to support Node v10 or later versions. Now, this module is employing [@abandonware/noble](https://github.com/abandonware/noble), which was forked from [noble](https://github.com/sandeepmistry/noble). For the purouse of the backward compatibility, this module works with [noble](https://github.com/sandeepmistry/noble) on Node v8 or earlier versions.
+~~The early versions of this module depended on [noble](https://github.com/sandeepmistry/noble) for BLE handling. But the [noble](https://github.com/sandeepmistry/noble) seems not to support Node v10 or later versions. Now, this module is employing [@abandonware/noble](https://github.com/abandonware/noble), which was forked from [noble](https://github.com/sandeepmistry/noble). For the purouse of the backward compatibility, this module works with [noble](https://github.com/sandeepmistry/noble) on Node v8 or earlier versions.~~
+
 
 
 ## Installation
 
 ```
-$ cd ~
-$ npm install @abandonware/noble
-$ npm install node-beacon-scanner
+$ npm install 'github:cocoabox/node-beacon-scanner#no-noble'
 ```
 
+## To try ight away
+
+```shell
+$ node detect-ibeacons.js
+```
 ---------------------------------------
 ## Table of Contents
 
@@ -53,19 +59,19 @@ This sample code shows how to start scanning and how to get parsed packets.
 
 ```JavaScript
 const BeaconScanner = require('node-beacon-scanner');
+const {Lescan} = require('switchbot-without-noble');
 const scanner = new BeaconScanner();
 
-// Set an Event handler for becons
-scanner.onadvertisement = (ad) => {
-  console.log(JSON.stringify(ad, null, '  '));
-};
-
-// Start scanning
-scanner.startScan().then(() => {
-  console.log('Started to scan.')  ;
-}).catch((error) => {
-  console.error(error);
-});
+const lescan = new Lescan('hci0');
+try {
+  const scanner = new BeaconScanner(lescan);
+  scanner.on('beacon-advertisement' , (ad) => {
+      // Handle advertisement here
+  });
+  await lescan.start();
+} catch (err) {
+  console.warn('SORRY:' , err);
+}
 ```
 
 The sample code above will output the result as follows:
